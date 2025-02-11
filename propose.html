@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Do You Like Me?</title>
+    <!-- Include the latest EmailJS SDK -->
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 100px;
+      }
+      #question {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+      .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .btn {
+        font-size: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+      }
+      #yes {
+        background-color: green;
+        color: white;
+      }
+      #no {
+        background-color: red;
+        color: white;
+      }
+      #nameInput {
+        font-size: 18px;
+        padding: 10px;
+        width: 200px;
+        margin-bottom: 20px;
+      }
+      .btn:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="question">Do you like me?</div>
+    <input type="text" id="nameInput" placeholder="Enter your name" oninput="enableButtons()" />
+    <div class="button-container" id="buttonContainer">
+      <button id="yes" class="btn" onclick="congratulations()" disabled>Yes</button>
+      <button id="no" class="btn" onclick="swapButtons()" disabled>No</button>
+    </div>
+    <script>
+      // Initialize EmailJS with your Public Key
+      window.onload = function () {
+        emailjs.init("TW0QkvJ_dezZKespB"); // Replace with your actual Public Key
+      };
+
+      // Function to enable buttons when the user enters their name
+      function enableButtons() {
+        const nameInput = document.getElementById("nameInput");
+        const yesButton = document.getElementById("yes");
+        const noButton = document.getElementById("no");
+
+        if (nameInput.value.trim() !== "") {
+          yesButton.disabled = false;
+          noButton.disabled = false;
+        } else {
+          yesButton.disabled = true;
+          noButton.disabled = true;
+        }
+      }
+
+      // Function to send email using EmailJS
+      function sendEmail(choice) {
+        const name = document.getElementById("nameInput").value.trim();
+        const templateParams = {
+          user_name: name, // User's name
+          user_choice: choice, // User's choice (Yes or No)
+          message:
+            choice === "Yes"
+              ? `${name} likes you! 🎉`
+              : `${name} clicked No, but I hope they change their mind.`,
+        };
+        // Send email using EmailJS
+        return emailjs
+          .send("service_9i4ywfg", "template_f4e122t", templateParams) // Replace with your Service ID and Template ID
+          .then((response) => {
+            console.log("Email sent successfully", response);
+            return response; // Return the response for further handling
+          })
+          .catch((error) => {
+            console.error("Error sending email:", error);
+            throw error; // Re-throw the error to handle it in the calling function
+          });
+      }
+
+      // Function to handle the "Yes" button click
+      function congratulations() {
+        const name = document.getElementById("nameInput").value.trim();
+        
+        // Send email for "Yes" choice
+        sendEmail("Yes")
+          .then(() => {
+            // Only update the page content after the email has been sent
+            document.body.innerHTML = `<h1>🎉 Congratulations, ${name}! 🎉</h1><p>You made the right choice! 😊</p>`;
+          })
+          .catch((error) => {
+            console.error("Error sending email:", error);
+            // Optionally, you can display an error message to the user
+            alert("There was an error sending the email. Please try again.");
+          });
+      }
+
+      // Function to swap the positions of "Yes" and "No" buttons
+      function swapButtons() {
+        let container = document.getElementById("buttonContainer");
+        let yesButton = document.getElementById("yes");
+        let noButton = document.getElementById("no");
+        // Swap positions by reordering the buttons
+        if (yesButton.nextElementSibling === noButton) {
+          container.insertBefore(noButton, yesButton);
+        } else {
+          container.insertBefore(yesButton, noButton);
+        }
+        sendEmail("No"); // Send email for "No" choice
+      }
+    </script>
+  </body>
+</html>
